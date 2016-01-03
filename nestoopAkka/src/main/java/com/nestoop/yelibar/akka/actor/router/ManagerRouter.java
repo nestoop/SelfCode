@@ -34,7 +34,7 @@ public class ManagerRouter {
 		
 		ActorRef worker=system.actorOf(Props.create(Worker.class),"worker");
 		
-		master.tell(worker,worker);
+		master.tell(worker,master);
 		
 	}
 	
