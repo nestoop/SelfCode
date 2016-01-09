@@ -39,7 +39,7 @@ public class RpcClientServiceRegistry {
 		this.registryAddress = registryAddress;
 		ZooKeeper zk = connectServer();
         if (zk != null) {
-            watchNode(zk);
+            watchNode(zk,true);
         }
 	}
 	
@@ -48,6 +48,7 @@ public class RpcClientServiceRegistry {
     	String logStr=null;
         String data = null;
         int size = dataList.size();
+        logger.debug("zookeeper can used znode size: {}", size);
         if (size > 0) {
             if (size == 1) {
                 data = dataList.get(0);
@@ -62,7 +63,7 @@ public class RpcClientServiceRegistry {
         return data;
     }
 	 
-	//创建链接
+	//根据地址，客户端寻找zookeeper的实例，创建链接
 	private ZooKeeper connectServer() {
 		logger.info("Rpc客户端链接创建zookeeper：");
         ZooKeeper zookeeper = null;
@@ -84,20 +85,26 @@ public class RpcClientServiceRegistry {
         return zookeeper;
     }
 	//监控zookeeper的znode
-	private void watchNode(final ZooKeeper zk) {
+	private void watchNode(final ZooKeeper zk,boolean iswatch) {
 		logger.info("Rpc客户端监控zookeeper：");
+		List<String> nodeList=null;
         try {
-//            List<String> nodeList = zk.getChildren(RpcClientConstant.ZK_REGISTRY_PATH, new Watcher() {
-//                public void process(WatchedEvent event) {
-//                    if (event.getType() == Event.EventType.NodeChildrenChanged) {
-//                        watchNode(zk);
-//                    }
-//                }
-//            });
-            List<String> nodeList = zk.getChildren(RpcClientConstant.ZK_REGISTRY_PATH,true);
-            
-            List<String> dataList = new ArrayList<String>();
-            
+        	if(!iswatch){
+        		nodeList = zk.getChildren(RpcClientConstant.ZK_REGISTRY_PATH, new Watcher() {
+        			public void process(WatchedEvent event) {
+        				if (event.getType() == Event.EventType.NodeChildrenChanged) {
+        					watchNode(zk,false);
+        				}
+        			}
+        		});
+        		
+        	}else{
+        		nodeList = zk.getChildren(RpcClientConstant.ZK_REGISTRY_PATH,true);
+        	}
+//            List<String> nodeList = zk.getChildren(RpcClientConstant.ZK_REGISTRY_PATH,true);
+//            
+//            List<String> dataList = new ArrayList<String>();
+//            
             for (String node : nodeList) {
                 byte[] bytes = zk.getData(RpcClientConstant.ZK_REGISTRY_PATH + "/" + node, false, null);
                 dataList.add(new String(bytes));

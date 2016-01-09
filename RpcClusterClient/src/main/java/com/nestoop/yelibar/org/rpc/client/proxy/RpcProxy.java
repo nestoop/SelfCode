@@ -74,6 +74,7 @@ public class RpcProxy {
 			request.setParameterTypes(method.getParameterTypes());
 			request.setRequestId(UUID.randomUUID().toString());
 			
+			//寻找zookeeper
 			if(clientRegistry != null){
 				clientRegistry.discover();
 				

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="main/java/|resources/" kind="src" path="src"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="lib/netty-all-4.0.33.Final.jar" sourcepath="E:/学习工具/Netty/netty-4.0.33.Final/jar/all-in-one/netty-all-4.0.33.Final-sources.jar"/>
+	<classpathentry kind="output" path="webapp/classes"/>
+</classpath>
