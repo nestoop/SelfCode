@@ -1,6 +1,7 @@
 package com.nestoop.org.net.rpc.cluster.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -8,15 +9,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
-import org.jboss.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -24,12 +20,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterRequest;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
 import com.nestoop.org.net.rpc.cluster.netty.decodeorcode.RpcClusterDecoder;
 import com.nestoop.org.net.rpc.cluster.netty.decodeorcode.RpcClusterEnCoder;
 import com.nestoop.org.net.rpc.cluster.netty.handler.RpcClusterHandler;
 import com.nestoop.org.net.rpc.cluster.registry.RpcServiceRegistry;
-import com.nestoop.org.net.rpc.cluster.request.RpcClusterRequest;
-import com.nestoop.org.net.rpc.cluster.response.RpcClusterResponse;
 import com.nestoop.org.net.rpc.cluster.spring.RPCScaneServer;
 
 
@@ -75,15 +71,6 @@ public class RpcServer implements ApplicationContextAware, InitializingBean{
 	}
 	
 	public void start() throws InterruptedException{
-		
-		ServerSocketChannel acceptorSvr=null;
-		try {
-			acceptorSvr = ServerSocketChannel.open();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
 		logger.debug("请求放入Netty,启动Netty......");
 		 EventLoopGroup parentGroup = new NioEventLoopGroup();
 	     EventLoopGroup childGroup = new NioEventLoopGroup();
@@ -111,12 +98,13 @@ public class RpcServer implements ApplicationContextAware, InitializingBean{
             logger.debug("Netty server start host:{}", host);
             //netty启动
             ChannelFuture future = (ChannelFuture) bootstrap.bind(port).sync();
-//            future.getChannel().close().sync();
+            future.channel().closeFuture().sync();
+            
 	     }catch(Exception e){
 	    	 
 	     }finally{
-//	    	 parentGroup.shutdownGracefully().sync();
-//	    	 childGroup.shutdownGracefully().sync();
+	    	 parentGroup.shutdownGracefully().sync();
+	    	 childGroup.shutdownGracefully().sync();
 	     }
 		
 	}

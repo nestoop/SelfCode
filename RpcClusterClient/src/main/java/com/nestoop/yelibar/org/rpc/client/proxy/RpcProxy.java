@@ -8,10 +8,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nestoop.yelibar.org.rpc.client.netty.RpcClientHandler;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterRequest;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
+import com.nestoop.yelibar.org.rpc.client.netty.handler.RpcClientHandler;
 import com.nestoop.yelibar.org.rpc.client.registry.RpcClientServiceRegistry;
-import com.nestoop.yelibar.org.rpc.client.request.RpcClusterRequest;
-import com.nestoop.yelibar.org.rpc.client.response.RpcClusterResponse;
 /**
  * 客户端代理
  * @author xbao
@@ -73,28 +73,33 @@ public class RpcProxy {
 			request.setParameters(parameters);
 			request.setParameterTypes(method.getParameterTypes());
 			request.setRequestId(UUID.randomUUID().toString());
-			
+			String serverAddress="";
 			//寻找zookeeper
 			if(clientRegistry != null){
-				clientRegistry.discover();
+				serverAddress=clientRegistry.discover();
 				
 			}
+			logger.debug("Rpc Client 从zookeeper发现服务端的调用 Server Address:{}", serverAddress);
 			//分割zookeeper地址，找到zookeeper
-			String[] array = registryAddress.split(":");
+			String[] array = serverAddress.split(":");
             String host = array[0];
             int port = Integer.parseInt(array[1]);
             //创建rpc client;
             RpcClientHandler rpcClienthandler=new RpcClientHandler(host, port);
             //发送消息
             RpcClusterResponse response = rpcClienthandler.sendMessageToServer(request);
-			
-            if(response.getError() !=null){
-            	logger.error("Rpc Client Proxy 动态代理出现错误 ,错误信息:{}", response.getError());
-            	throw response.getError();
-            }else{
-            	logger.error("Rpc Client Proxy i非常正确 ,正确返回对象是:{}", response.getResult());
-            	return response.getResult();
-            }
+			if(response == null ){
+				logger.debug("Rpc 调用server端返回的对象response", response);
+				return null;
+			}else{
+	            if(response.getError() !=null){
+	            	logger.error("Rpc Client Proxy 动态代理出现错误 ,错误信息:{}", response.getError());
+	            	throw response.getError();
+	            }else{
+	            	logger.error("Rpc Client Proxy i非常正确 ,正确返回对象是:{}", response.getResult());
+	            	return response.getResult();
+	            }
+			}
 		}
 		
 		

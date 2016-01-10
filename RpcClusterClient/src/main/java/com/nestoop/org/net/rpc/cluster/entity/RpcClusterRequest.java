@@ -1,11 +1,15 @@
-package com.nestoop.yelibar.org.rpc.client.request;
+package com.nestoop.org.net.rpc.cluster.entity;
+
+import java.io.Serializable;
 
 /**
  * 请求
  * @author xbao
  *
  */
-public class RpcClusterRequest {
+public class RpcClusterRequest implements Serializable  {
+	
+	private static final long serialVersionUID = 1L;
 	//请求ID
 	private String requestId;
 	//请求classname

@@ -1,11 +1,15 @@
-package com.nestoop.org.net.rpc.cluster.response;
+package com.nestoop.org.net.rpc.cluster.entity;
+
+import java.io.Serializable;
 
 /**
  * 请求响应
  * @author xbao
  *
  */
-public class RpcClusterResponse {
+public class RpcClusterResponse implements Serializable  {
+	
+	private static final long serialVersionUID = 1L;
 	//请求的Id
 	private String requestId;
 	//响应异常信息

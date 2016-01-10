@@ -1,4 +1,6 @@
-package com.nestoop.yelibar.org.rpc.client.response;
+package com.nestoop.org.net.rpc.cluster.entity;
+
+import java.io.Serializable;
 
 
 /**
@@ -6,7 +8,9 @@ package com.nestoop.yelibar.org.rpc.client.response;
  * @author xbao
  *
  */
-public class RpcClusterResponse {
+public class RpcClusterResponse implements Serializable  {
+	
+	private static final long serialVersionUID = 1L;
 	//请求的Id
 	private String requestId;
 	//响应异常信息

@@ -8,12 +8,16 @@ import net.sf.cglib.reflect.FastMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nestoop.org.net.rpc.cluster.request.RpcClusterRequest;
-import com.nestoop.org.net.rpc.cluster.response.RpcClusterResponse;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterRequest;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 /**
  * Netty的handler
@@ -24,13 +28,20 @@ public class RpcClusterHandler extends SimpleChannelInboundHandler<RpcClusterReq
 	
 	private static final Logger logger = LoggerFactory.getLogger(RpcClusterHandler.class);
 
-    private final Map<String, Object> handlerMap;
+    private  Map<String, Object> handlerMap;
+    
+    
+    public volatile static ChannelGroup globalChannelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public RpcClusterHandler(Map<String, Object> handlerMap) {
         this.handlerMap = handlerMap;
     }
-
-	protected void channelRead0(ChannelHandlerContext handlerContext,RpcClusterRequest request) throws Exception {
+    
+    @Override
+	protected void channelRead0(ChannelHandlerContext ctx, RpcClusterRequest msg)
+			throws Exception {
+		logger.debug(String.format("请求client 进来了的classname:%s", msg.getClass().getSimpleName()));
+		RpcClusterRequest request=(RpcClusterRequest)msg;
 		//定义返回响应
 		RpcClusterResponse response=new RpcClusterResponse();
 		//设置请求id
@@ -43,13 +54,13 @@ public class RpcClusterHandler extends SimpleChannelInboundHandler<RpcClusterReq
 		} catch (Exception e) {
 			response.setError(e);
 		}
-		
-		handlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-		
+		ChannelFuture f = ctx.writeAndFlush(response);
+	    f.addListener(ChannelFutureListener.CLOSE);
 	}
 	
-	@SuppressWarnings("unused")
+	
 	private Object handlerRequestToObjct(RpcClusterRequest request) throws Exception {
+		logger.debug("server hashMap size:{}",handlerMap.size());
 		//请求的className
 		String className=request.getClassName();
 		logger.debug(String.format("请求的classname:%s", className));
@@ -65,27 +76,28 @@ public class RpcClusterHandler extends SimpleChannelInboundHandler<RpcClusterReq
 		Object[] requestParameters=request.getParameters();
 		Class<?>[] requestParametersType=request.getParameterTypes();
 		/**
-		 * java 的反射机制
-		 * 1：大众的反射机制
-		 * 2：fastclass反射机制
-		
-		try {
-			Method method=requestServiceClass.getMethod(requestServiceMethodName, requestParametersType);
-			method.setAccessible(true);
-			Object serviceObjcet= method.invoke(serviceBean, requestParameters);
-			return serviceObjcet;
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		 */
+//		 * java 的反射机制
+//		 * 1：大众的反射机制
+//		 * 2：fastclass反射机制
+//		*/
+//		try {
+//			Method method=requestServiceClass.getMethod(requestServiceMethodName, requestParametersType);
+//			method.setAccessible(true);
+//			Object serviceObjcet= method.invoke(serviceBean, requestParameters);
+//			return serviceObjcet;
+//		} catch (NoSuchMethodException e) {
+//			e.printStackTrace();
+//		} catch (SecurityException e) {
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			e.printStackTrace();
+//		} catch (IllegalArgumentException e) {
+//			e.printStackTrace();
+//		} catch (InvocationTargetException e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+		 
 		//fastclass
 		
 		FastClass serviceFastClass=FastClass.create(requestServiceClass);
@@ -99,6 +111,27 @@ public class RpcClusterHandler extends SimpleChannelInboundHandler<RpcClusterReq
         logger.error("server caught exception", cause);
         handlerContext.close();
     }
+
+
+	@Override
+	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+		super.channelRegistered(ctx);
+		logger.debug(String.format("请求client 端进入netty channelRegistered......................."));
+	}
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		logger.debug(String.format("请求client 端进入 netty channelActive......................."));
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		super.channelInactive(ctx);
+		logger.debug(String.format("请求client 端进入 netty channelInactive ，channel 断开"));
+	}
+
+	
+	
 
 
 

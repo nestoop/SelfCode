@@ -82,7 +82,7 @@ public class RpcSerializationUtil {
 		 public static <T> T deSerialize(byte[] bytes,Class<T> classz){
 			 
 			 try{
-				 T serializeObject=(T) objenesis.getInstantiatorOf(classz);
+				 T serializeObject=(T) objenesis.newInstance(classz);
 				 Schema<T> schema=getSchema(classz);
 				 ProtostuffIOUtil.mergeFrom(bytes, serializeObject, schema);
 				 return serializeObject;

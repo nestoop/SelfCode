@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
 import com.nestoop.org.net.rpc.cluster.util.serialize.RpcSerializationUtil.ProtoBufSerialiable;
 
 import io.netty.buffer.ByteBuf;
@@ -18,7 +19,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
  */
 public class RpcClusterDecoder extends ByteToMessageDecoder {
 	
-	public static final Logger logger = LoggerFactory.getLogger(ByteToMessageDecoder.class);
+	public static final Logger logger = LoggerFactory.getLogger(RpcClusterDecoder.class);
 	
 	private Class<?> classz;
 

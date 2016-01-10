@@ -3,9 +3,11 @@ package com.nestoop.org.net.rpc.cluster.netty.channelinit;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterRequest;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
 import com.nestoop.org.net.rpc.cluster.netty.decodeorcode.RpcClusterDecoder;
+import com.nestoop.org.net.rpc.cluster.netty.decodeorcode.RpcClusterEnCoder;
 import com.nestoop.org.net.rpc.cluster.netty.handler.RpcClusterHandler;
-import com.nestoop.org.net.rpc.cluster.request.RpcClusterRequest;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -26,7 +28,7 @@ public class RpcClusterChannelInitializer extends ChannelInitializer<SocketChann
 	protected void initChannel(SocketChannel ch) throws Exception {
 		//解码
 		ch.pipeline().addLast(new RpcClusterDecoder(RpcClusterRequest.class));
-		ch.pipeline().addLast(new RpcClusterDecoder(RpcClusterRequest.class));
+		ch.pipeline().addLast(new RpcClusterEnCoder(RpcClusterResponse.class));
 		ch.pipeline().addLast(new RpcClusterHandler(handlerMap));
 		
 	}

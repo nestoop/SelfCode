@@ -27,7 +27,7 @@ public class RpcSerializationUtil {
 		public static final Logger logger = LoggerFactory.getLogger(ProtoBufSerialiable.class);
 		
 		
-		 private static Map<Class<?>, Schema<?>> cachedSchemaMap = new ConcurrentHashMap();
+		 private static Map<Class<?>, Schema<?>> cachedSchemaMap = new ConcurrentHashMap<Class<?>, Schema<?>>();
 
 		 private static Objenesis objenesis = new ObjenesisStd(true);
 
@@ -71,6 +71,7 @@ public class RpcSerializationUtil {
 				 e.printStackTrace();
 			 }finally{
 				 //清除缓冲区
+				 logger.debug("protobuf 清除缓存区...................");
 				 buffer.clear();
 			 }
 			 
@@ -82,7 +83,7 @@ public class RpcSerializationUtil {
 		 public static <T> T deSerialize(byte[] bytes,Class<T> classz){
 			 
 			 try{
-				 T serializeObject=(T) objenesis.getInstantiatorOf(classz);
+				 T serializeObject=(T) objenesis.newInstance(classz);
 				 Schema<T> schema=getSchema(classz);
 				 ProtostuffIOUtil.mergeFrom(bytes, serializeObject, schema);
 				 return serializeObject;

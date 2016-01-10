@@ -1,12 +1,12 @@
-package com.nestoop.yelibar.org.rpc.client.netty;
+package com.nestoop.yelibar.org.rpc.client.netty.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterRequest;
+import com.nestoop.org.net.rpc.cluster.entity.RpcClusterResponse;
 import com.nestoop.yelibar.org.rpc.client.netty.decodeorcode.RpcClusterDecoder;
 import com.nestoop.yelibar.org.rpc.client.netty.decodeorcode.RpcClusterEnCoder;
-import com.nestoop.yelibar.org.rpc.client.request.RpcClusterRequest;
-import com.nestoop.yelibar.org.rpc.client.response.RpcClusterResponse;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -64,16 +64,18 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcClusterResp
 				}
 			}).option(ChannelOption.SO_KEEPALIVE, true);
 			 
+			 logger.debug("Rpc Client host:{},port:{}",host,port);
 			 //启动
 			 ChannelFuture future = bootstrap.connect(host, port).sync();
 			 
 	         future.channel().writeAndFlush(request).sync();
-
+//
 	          synchronized (obj) {
 	                obj.wait(); // 未收到响应，使线程等待
 	          }
 
 	          if (response != null) {
+	        	  System.out.println("--------------------返回--------------------------");
 	                future.channel().closeFuture().sync();
 	          }
 	         return response;
@@ -96,6 +98,22 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcClusterResp
             obj.notifyAll();
         }
 
+	}
+
+	@Override
+	public void channelRead(ChannelHandlerContext ctx, Object msg)
+			throws Exception {
+		// TODO Auto-generated method stub
+		super.channelRead(ctx, msg);
+		
+		logger.debug("Rpc Client Netty 通道数据读取.........");
+		this.response=(RpcClusterResponse) msg;
+		 // 收到响应，唤醒线程
+		synchronized (obj) {
+            obj.notifyAll();
+        }
+
+		
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.nestoop.yelibar.org.rpc.client.serialize.RpcSerializationUtil.ProtoBufSerialiable;
 
@@ -16,9 +18,10 @@ import io.netty.handler.codec.ByteToMessageDecoder;
  * @author xbao
  *
  */
+
 public class RpcClusterDecoder extends ByteToMessageDecoder {
 	
-	public static final Logger logger = LoggerFactory.getLogger(ByteToMessageDecoder.class);
+	public static final Logger logger = LoggerFactory.getLogger(RpcClusterDecoder.class);
 	
 	private Class<?> classz;
 
@@ -30,9 +33,10 @@ public class RpcClusterDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext handlercontext, ByteBuf in,List<Object> out) throws Exception {
+		
+		logger.debug("buf中读取的长度,buf.readableBytes={}",in.readableBytes());
 		//判断读取的字节小于4 返回
 		if(in.readableBytes()<4){
-			logger.debug("buf中读取的长度,buf.readableBytes={}",in.readableBytes());
 			return;
 		}
 		//继续读取
